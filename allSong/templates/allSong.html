@@ -1,0 +1,80 @@
+{% extends "title_base.html"  %}
+{% block title  %}
+{% load staticfiles %}
+<link type="image/x-icon" rel="shortcut icon" href="{% static "image/daohang.png" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/ranking.css" %}">
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo.png" %}"></a>
+        <div class="search-box">
+            <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
+            {% csrf_token %}
+                <div class="search-keyword">
+                    <input name="kword" type="text" class="keyword" maxlength="120"  placeholder="音乐节"  />
+                </div>
+                <input id="subSerch" type="submit" class="search-button" value="搜 索" style="background-color: #E41318;"/>
+            </form>
+            <div id="suggest" class="search-suggest"></div>
+            <div class="search-hot-words">
+                {% for song in search_song  %}
+                <a target="play" href="{% url 'play' song.song.song_id %}" >{{ song.song.song_name }}</a>
+                {% endfor  %}
+            </div>
+        </div>
+    </div><!--end header-->
+    <div class="nav-box">
+		<div class="nav-box-inner">
+			<ul class="nav clearfix">
+                <li><a href="/">首页</a></li>
+				<li><a href="{% url 'ranking' %}">歌曲排行</a></li>
+                <li><a href="{% url 'allSong' %}">全部歌曲</a></li>
+	    	    <li><a href="{% url 'home' 1 %}" target="_blank">用户中心</a></li>
+			</ul>
+		</div>
+	</div><!--end nav-box-->
+    <div class="wrapper clearfix">
+    <!-- 左侧列表 -->
+    <div class="side">
+
+  	</div><!-- 左侧列表 end -->
+
+	<div class="main">
+		<div class="main-head-box clearfix">
+			<div class="main-head"><h1>{{ title }}</h1></div>
+		</div>
+		<table class="rank-list-table">
+			<tr>
+				<th class="cell-1">ID</th>
+				<th class="cell-2">图片</th>
+				<th class="cell-3">歌名</th>
+                <th class="cell-4">歌手</th>
+				<th class="cell-5">专辑</th>
+			</tr>
+            {% for item in song_list  %}
+                <tr>
+                    {%if forloop.counter < 4  %}
+                    <td><span class="n1">{{forloop.counter}}</span></td>
+                    {%else %}
+                    <td><span class="n2">{{forloop.counter}}</span></td>
+                    {%endif %}
+                    <td>
+                    <a href="{% url 'play' item.song_id %}"  class="pic" target="play"><img src="/{{ item.song_img }}"  width="80" height="80"></a>
+                    </td>
+                    <td class="name-cell">
+                    <h3><a href="{% url 'play' item.song_id %}" target="play" >{{item.song_name}}</a></h3>
+                    </td>
+                    <td>
+                    <div style="text-align:center;">{{item.song_singer}}</div>
+                    </td>
+                    <td>
+                    <div style="text-align:center;">{{item.song_album}}</div>
+                    </td>
+                </tr>
+            {% endfor  %}
+        </table>
+	</div>
+    </div>
+    <script data-main="{% static "js/ranking.js" %}" src="{% static "js/require.js" %}"></script>
+{% endblock  %}

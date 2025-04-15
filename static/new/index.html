@@ -1,0 +1,363 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>音乐数据可视化分析</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/globle.css">
+    <link type="image/x-icon" rel="shortcut icon" href="{% static "image/daohang.png" %}">
+    <link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
+    <link type="text/css" rel="stylesheet" href="{% static "css/index.css" %}">
+</head>
+<body>
+<div class="main">
+    <div class="top_title" style="text-align: center; font-size: 30px;; color: #82b8e2">
+        音乐数据可视化分析
+    </div>
+    <div class="datas">
+        <div class="data_left">
+            <div class="left_top">
+                <div class="left_top_title">不同歌曲类型的听歌次数比例</div>
+                <div class="left_top_main" id="chat1">
+                </div>
+            </div>
+            <div class="left_bottom">
+                <div class="left_top_title">不同时段听歌次数</div>
+                <div id="chat2" class="left_top_main left_bottom_main"></div>
+            </div>
+        </div>
+        <div class="data_right">
+            <div class="right_top">
+                <div class="left_top_title">热门播放歌曲</div>
+                <div id="chat3" class="left_top_main right_top_main"></div>
+            </div>
+            <div class="right_bottom">
+                <div class="left_top_title">1-12月不同类型播放量变化</div>
+                <div id="chat4" class="left_top_main right_top_main"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/echarts.min.js"></script>
+<script type="text/javascript" src="js/js.js"></script>
+<script type="text/javascript">
+    $(function () {
+        echarts_1();
+        echarts_2();
+        echarts_3();
+        echarts_4();
+
+        function echarts_1() {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('chat1'));
+            $.get("/chat1", function (res) {
+                option = {
+                    title: {
+                        text: '',
+                        subtext: '',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 10,
+                        textStyle: {
+                            color: '#FFFFFF'
+                        }
+                    },
+                    series: [
+                        {
+                            name: '听歌次数',
+                            type: 'pie',
+                            radius: '50%',
+                            center: ['70%', '50%'],
+                            data: res,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            })
+
+        }
+
+        function echarts_2() {
+            var myChart = echarts.init(document.getElementById('chat2'));
+            $.get("/chat2", function (res) {
+                var option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '0%',
+                        top: '10px',
+                        right: '0%',
+                        bottom: '4%',
+                        containLabel: true
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        data: res.labelList,
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLabel: {
+                            interval: 0,
+                            // rotate:50,
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: '12',
+                            },
+                            rotate: 45,
+                            formatter: function (value) {
+                                // 截断文字
+                                var maxLength = 8; // 设置最大长度
+                                if (value.length > maxLength) {
+                                    return value.substring(0, maxLength) + '...'; // 超过最大长度时截断并加上省略号
+                                } else {
+                                    return value;
+                                }
+                            }
+                        },
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: '12',
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1	)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                            }
+                        }
+                    }],
+                    series: [
+                        {
+                            type: 'line',
+                            data: res.dataList,
+                            barWidth: '35%', //柱子宽度
+                            // barGap: 1, //柱子之间间距
+                            itemStyle: {
+                                normal: {
+                                    color: '#2f89cf',
+                                    opacity: 1,
+                                    barBorderRadius: 5,
+                                }
+                            }
+                        }
+                    ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+
+        function echarts_3() {
+            var myChart = echarts.init(document.getElementById('chat3'));
+            $.get("/chat3", function (res) {
+                var option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '0%',
+                        top: '10px',
+                        right: '0%',
+                        bottom: '4%',
+                        containLabel: true
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        data: res.labelList,
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLabel: {
+                            interval: 0,
+                            // rotate:50,
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: '12',
+                            },
+                            rotate: 45,
+                            formatter: function (value) {
+                                // 截断文字
+                                var maxLength = 8; // 设置最大长度
+                                if (value.length > maxLength) {
+                                    return value.substring(0, maxLength) + '...'; // 超过最大长度时截断并加上省略号
+                                } else {
+                                    return value;
+                                }
+                            }
+                        },
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        axisLabel: {
+                            //formatter: '{value} %'
+                            show: true,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: '12',
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1	)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                            }
+                        }
+                    }],
+                    series: [
+                        {
+                            type: 'bar',
+                            data: res.dataList,
+                            barWidth: '35%', //柱子宽度
+                            // barGap: 1, //柱子之间间距
+                            itemStyle: {
+                                normal: {
+                                    color: '#2f89cf',
+                                    opacity: 1,
+                                    barBorderRadius: 5,
+                                }
+                            }
+                        }
+                    ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+
+        function echarts_4() {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('chat4'));
+            $.get("/chat4", function (res) {
+                var option = {
+                    title: {
+                        text: ''
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: res.labelList,
+                        textStyle: {
+                            color: '#FFFFFF'
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                        axisLabel: {
+                                color: '#FFFFFF'
+                            }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                                color: '#FFFFFF'
+                            }
+                    },
+                    series: res.dataList
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            })
+
+
+        }
+
+    })
+
+</script>
